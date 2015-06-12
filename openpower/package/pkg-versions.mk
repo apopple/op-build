@@ -70,16 +70,16 @@ whoami | xargs echo -n >> $$($(2)_VERSION_FILE); \
 echo -n "-" >> $$($(2)_VERSION_FILE); \
 \
 cd "$$($(2)_SITE)"; (git describe --tags || git log -n1 --pretty=format:'%h' || echo "unknown") \
-	| sed 's/\(.*\)-g\([0-9a-f]\{7\}\).*/\2/' | xargs echo -n \
+	| sed 's/\(.*\)-g\([0-9a-f]\{7\}\).*/\2/;s/$(1)-//;' | xargs echo -n \
 	>> $$($(2)_VERSION_FILE); \
 \
-cd "$$($(2)_SITE)"; git describe --all --dirty | grep -e "-dirty" | sed 's/.*\(-dirty\)/\1/' | \
+cd "$$($(2)_SITE)"; git describe --all --dirty | grep -e "-dirty" | sed 's/.*\(-dirty\)/\1/;' | \
 	xargs echo -n >> $$($(2)_VERSION_FILE); \
 else \
 \
 [ `echo -n $$($(2)_VERSION) | wc -c` == "40" ] && (echo -n $$($(2)_VERSION) | \
-	sed "s/^\([0-9a-f]\{7\}\).*/\1/" >> $$($(2)_VERSION_FILE)) \
-	|| echo -n $$($(2)_VERSION) >> $$($(2)_VERSION_FILE); \
+	sed "s/^\([0-9a-f]\{7\}\).*/\1/;s/$(1)-//;" >> $$($(2)_VERSION_FILE)) \
+	|| echo -n $$($(2)_VERSION) | sed -e 's/$(1)-//' >> $$($(2)_VERSION_FILE); \
 \
 cd "$$(BR2_EXTERNAL)"; git describe --all --dirty | \
 	if grep -e "-dirty"; then \
@@ -184,9 +184,15 @@ $(1)-print-version:
 		@cat $$($$(UPPER_CASE_PKG)_VERSION_FILE)
 		@echo ""; echo "**See openpower/package/VERSION.readme for detailed info on package strings"; echo ""
 
-
 # Rule to generate pnor version
 $(1)-build-version: $$(foreach pkg,$$(OPENPOWER_VERSIONED_SUBPACKAGES), $$(pkg)-version)
+		@$$($$(UPPER_CASE_PKG)_OPENPOWER_VERSION_FILE)
+		@echo "=== $$(UPPER_CASE_PKG)_VERSION ==="
+		@cat $$($$(UPPER_CASE_PKG)_VERSION_FILE)
+		@echo ""; echo "**See openpower/package/VERSION.readme for detailed info on package strings"; echo ""
+
+# Rule to force re-generation of all versioned subpackages
+$(1)-build-version-all: $$(foreach pkg,$$(OPENPOWER_VERSIONED_SUBPACKAGES), $$(pkg)-build-version)
 		@$$($$(UPPER_CASE_PKG)_OPENPOWER_VERSION_FILE)
 		@echo "=== $$(UPPER_CASE_PKG)_VERSION ==="
 		@cat $$($$(UPPER_CASE_PKG)_VERSION_FILE)

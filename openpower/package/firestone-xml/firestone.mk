@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-FIRESTONE_XML_VERSION ?= 8023db709f2ed5ee4c481fcb7eff68a30248e0ae
+FIRESTONE_XML_VERSION ?= 5123184b9f26bc1068afb9b57e796aecaf61b249
 FIRESTONE_XML_SITE ?= $(call github,open-power,firestone-xml,$(FIRESTONE_XML_VERSION))
 
 FIRESTONE_XML_LICENSE = Apache-2.0
@@ -32,7 +32,6 @@ define FIRESTONE_XML_BUILD_CMDS
         bash -c 'mkdir -p $(MRW_SCRATCH) && cp -r $(@D)/* $(MRW_SCRATCH)'
 
         # generate the system mrw xml
-        # Not processing until actaul xml is here
         perl -I $(MRW_HB_TOOLS) \
         $(MRW_HB_TOOLS)/processMrw.pl -x $(MRW_SCRATCH)/firestone.xml
         
